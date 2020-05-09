@@ -1,8 +1,7 @@
 #![feature(no_more_cas)]
+#![allow(dead_code)]
 
-use std::fs::File;
 use std::path::PathBuf;
-use std::io::{Read};
 use structopt::StructOpt;
 
 // Labeled V0-VF -> 0 -> F, 0 -> 15
@@ -26,12 +25,15 @@ struct Opt {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let opt = Opt::from_args();
+
+    // Load the rom
     let memory = Memory::from_file(opt.rom)?;
 
     println!("{:#?}", memory);
 
-    // let mut t = Timer::new();
-    // t.start();
+    // Initialize Timers
+    let mut t = Timer::new();
+    t.start();
 
     Ok(())
 }
