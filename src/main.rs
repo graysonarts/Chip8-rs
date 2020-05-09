@@ -6,21 +6,21 @@ use structopt::StructOpt;
 
 // Labeled V0-VF -> 0 -> F, 0 -> 15
 const VF: usize = 15;
-type GeneralRegisters = [u8;16];
+type GeneralRegisters = [u8; 16];
 type AddressRegister = u16;
 type Stack = Vec<u16>;
 
-mod timer;
 mod memory;
+mod timer;
 
-use timer::Timer;
 use memory::Memory;
+use timer::Timer;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "chip8", about = "Chip-8 Emulator")]
 struct Opt {
     #[structopt(name = "ROM", parse(from_os_str))]
-    rom: PathBuf
+    rom: PathBuf,
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {

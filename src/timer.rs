@@ -39,15 +39,12 @@ impl Timer {
     pub fn start(&mut self) {
         let delay = self.delay.clone();
         let sound = self.sound.clone();
-        self.thread = Some(std::thread::spawn(move || {
-					loop {
-						std::thread::sleep(std::time::Duration::from_millis(16));
-						decrement(&delay).unwrap_or_default();
-						decrement(&sound).unwrap_or_default();
-					}
-				}));
+        self.thread = Some(std::thread::spawn(move || loop {
+            std::thread::sleep(std::time::Duration::from_millis(16));
+            decrement(&delay).unwrap_or_default();
+            decrement(&sound).unwrap_or_default();
+        }));
     }
-
 }
 
 #[cfg(test)]
@@ -64,8 +61,8 @@ mod test_super {
     #[test]
     fn test_timers_above_zero_decrement() {
         let t = Timer::with_values(1, 2);
-				decrement(&t.delay).expect("fetch update failed");
-				decrement(&t.sound).expect("fetch update failed");
+        decrement(&t.delay).expect("fetch update failed");
+        decrement(&t.sound).expect("fetch update failed");
         assert_eq!(t.delay.load(Ordering::SeqCst), 0);
         assert_eq!(t.sound.load(Ordering::SeqCst), 1);
     }
