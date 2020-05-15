@@ -3,6 +3,7 @@
 use std::fs::File;
 use std::io::Read;
 use std::path::PathBuf;
+use std::ops::{Index, IndexMut};
 
 pub struct Memory([u8; 4096], usize);
 impl Memory {
@@ -26,5 +27,14 @@ impl std::fmt::Debug for Memory {
             })
             .collect();
         write!(f, "{}", result)
+    }
+}
+
+impl Index<u16> for Memory {
+    type Output = u8;
+
+    fn index(&self, i: u16) -> &Self::Output {
+        let idx: usize = i.into();
+        &self.0[idx]
     }
 }

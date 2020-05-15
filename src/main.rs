@@ -1,20 +1,21 @@
 #![feature(no_more_cas)]
 #![allow(dead_code)]
 
+#[macro_use] extern crate log;
+use pretty_env_logger;
+
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-// Labeled V0-VF -> 0 -> F, 0 -> 15
-const VF: usize = 15;
-type GeneralRegisters = [u8; 16];
-type AddressRegister = u16;
-type Stack = Vec<u16>;
-
+mod types;
 mod memory;
 mod timer;
+mod opcodes;
+mod errors;
 
 use memory::Memory;
 use timer::Timer;
+use types::*;
 
 #[derive(Debug, StructOpt)]
 #[structopt(name = "chip8", about = "Chip-8 Emulator")]
@@ -24,10 +25,16 @@ struct Opt {
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    pretty_env_logger::init();
+
     let opt = Opt::from_args();
 
     // Load the rom
-    let memory = Memory::from_file(opt.rom)?;
+    let mut memory = Memory::from_file(opt.rom)?;
+    let mut registers = GeneralRegisters::default();
+    let mut i = AddressRegister::default();
+    let mut stack : Stack = Vec::new();
+    let mut pc = ProgramCounter::default();
 
     println!("{:#?}", memory);
 
@@ -35,7 +42,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut t = Timer::new();
     t.start();
 
-    Ok(())
+    loop {
+        debug!("PC={:04x} I={:04x} REG={:?}", pc, i, registers);
+        let hb = memory[pc];
+        let lb = memory[pc+1];
+        let oc = u16::from_be_bytes([hb, lb]);
+        pc += 2;
+
+        opcodes::OpCode::from(oc).execute(&mut pc, &mut memory, &mut registers, &mut i, &mut stack)?;
+    }
 }
 
 #[cfg(test)]
